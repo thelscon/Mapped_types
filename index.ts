@@ -30,7 +30,7 @@ type UpperCaseKeys<ObjectT> = {
 // Стоврити тип, що на основі єнаму генерує тип об'єкту, що як ключ має назву 
 // ключа єнаму з додатковим префіксом 'get-' а як значення просто функцію
 
-enum EObjectProperties {
+const enum EObjectProperties {
     name ,
     age ,
     id
@@ -43,21 +43,29 @@ type ObjectBasedEnum = Record<`get-${keyof typeof EObjectProperties}` , () => vo
 // І саме цікаве. Створіть тип ObjectToPropertyDescriptor, який перетворює 
 // звичайний обʼєкт на обʼєкт де кожне value є дескриптором.
 
-type PropertyDescriptorType = {
-    value : any ,
-    writable ?: boolean ,
-    enumerable ?: boolean ,
-    configurable ?: boolean
-}
-
-// Изменяет значения свойств указанного объекта на PropertyDescriptorType
+// Простая версия
 type ObjectToPropertyDescriptor<ObjectT> = {
-    [Key in keyof ObjectT] : PropertyDescriptorType /*или PropertyDescriptor */
+    [Key in keyof ObjectT] : PropertyDescriptor
 }
 
-// Все значения свойств объекта данного типа приводятся к типу PropertyDescriptorType
+// Все типы значений свойств объекта данного типа приводятся к типу PropertyDescriptor
 type EmptyObjectToPropertyDescriptor = {
-    [index : number | string | symbol] : PropertyDescriptorType /*или PropertyDescriptor */
+    [index : number | string | symbol] : PropertyDescriptor
+}
+
+type PropertyDescriptorExtendsType<ValueT> = Partial<{
+    value : ValueT ,
+    writable : boolean ,
+    enumerable : boolean ,
+    configurable : boolean ,
+    get () : ValueT ,
+    set (value : ValueT) : void
+}>
+
+// Расширенная версия. Изменяет тип значений свойств указанного объекта на PropertyDescriptor, 
+// сохраняя при этом их изначальный тип в value
+type ObjectToPropertyDescriptorExtends<ObjectT> = {
+    [Key in keyof ObjectT] : PropertyDescriptorExtendsType<ObjectT[Key]>
 }
 
 
