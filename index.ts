@@ -1,8 +1,10 @@
 // Вам потрібно створити тип DeepReadonly який буде робити доступними тільки
 // для читання навіть властивості вкладених обʼєктів.
 
-type DeepReadonly<ObjectT> = {
-    readonly [Key in keyof ObjectT] : Readonly<ObjectT[Key]>
+type ToDeepReadonly<ObjT> = ObjT extends object ? DeepReadonly<ObjT> : ObjT ;
+
+type DeepReadonly<ObjectT extends object> = {
+    readonly [Key in keyof ObjectT] : ToDeepReadonly<ObjectT[Key]>
 }
 
 
@@ -10,8 +12,10 @@ type DeepReadonly<ObjectT> = {
 // Вам потрібно створити тип DeepRequireReadonly який буде робити доступними тільки 
 // для читання навіть властивості вкладених обʼєктів та ще й робити їх обовʼязковими.
 
+type ToDeepRequireReadonly<ObjT> = ObjT extends object ? DeepRequireReadonly<ObjT> : ObjT ;
+
 type DeepRequireReadonly<ObjectT> = {
-    readonly [Key in keyof ObjectT] -?: Required<Readonly<ObjectT[Key]>>
+    readonly [Key in keyof ObjectT] -?: ToDeepRequireReadonly<ObjectT[Key]>
 }
 
 
@@ -50,9 +54,11 @@ type ObjectToPropertyDescriptor<ObjectT> = {
 
 // Все типы значений свойств объекта данного типа приводятся к типу PropertyDescriptor
 type EmptyObjectToPropertyDescriptor = {
-    [index : number | string | symbol] : PropertyDescriptor
+    [index : keyof any] : PropertyDescriptor
 }
 
+// Расширенная версия. Изменяет тип значений свойств указанного объекта на PropertyDescriptor, 
+// сохраняя при этом их изначальный тип в value
 type PropertyDescriptorExtendsType<ValueT> = Partial<{
     value : ValueT ,
     writable : boolean ,
@@ -62,8 +68,6 @@ type PropertyDescriptorExtendsType<ValueT> = Partial<{
     set (value : ValueT) : void
 }>
 
-// Расширенная версия. Изменяет тип значений свойств указанного объекта на PropertyDescriptor, 
-// сохраняя при этом их изначальный тип в value
 type ObjectToPropertyDescriptorExtends<ObjectT> = {
     [Key in keyof ObjectT] : PropertyDescriptorExtendsType<ObjectT[Key]>
 }
